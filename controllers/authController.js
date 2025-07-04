@@ -1,4 +1,4 @@
-const user = require("../models/User");
+const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -11,13 +11,13 @@ const registerUser = async (req, res, next) => {
         message: "Email and password are required",
       });
     }
-    const existingUser = await user.findOne({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         message: "User already exists",
       });
     }
-    const newUser = await user.create({
+    const newUser = await User.create({
       email,
       password,
     });
@@ -42,14 +42,14 @@ const loginUser = async (req, res, next) => {
       });
     }
 
-    const User = await user.findOne({ email });
-    if (!User) {
+    const user = await User.findOne({ email });
+    if (!user) {
       return res.status(400).json({
         message: "Invalid email or password",
       });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, User.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({
         message: "Invalid email or password",
@@ -57,7 +57,7 @@ const loginUser = async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { UserId: User._id, role: user.role },
+      { UserId: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -68,9 +68,9 @@ const loginUser = async (req, res, next) => {
     res.status(200).json({
       message: "Login successful",
       user: {
-        id: User._id,
-        email: User.email,
-        role: User.role,
+        id: user._id,
+        email: user.email,
+        role: user.role,
       },
       token: token,
     });
