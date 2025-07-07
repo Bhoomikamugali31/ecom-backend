@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { sendRegistrationEmail } = require("../utils/email");
 
 const registerUser = async (req, res, next) => {
   try {
@@ -21,7 +22,10 @@ const registerUser = async (req, res, next) => {
       email,
       password,
     });
-
+    await sendRegistrationEmail({
+      to: newUser.email,
+      email: newUser.email,
+    });
     res.status(201).json({
       message: "User registered successfully",
     });
